@@ -1,6 +1,7 @@
 language: "ko-KR"
 enable_free_tier: true
 reviews:
+  auto: true
   profile: chill
   request_changes_workflow: true
   high_level_summary: true
