@@ -1,4 +1,4 @@
-name: swagger openapi extract
+name: Build & Upload OpenAPI Spec
 on:
   workflow_dispatch:
 
@@ -25,7 +25,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v3  #gp-pages 브랜치 root에 swagger-ui push
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: swagger-ui
+
+      - name: Upload OpenAPI spec as artifact
+        uses: actions/upload-artifact@v4 #json 파일 아티팩트로 업로드
+        with:
+          name: openapi-spec
+          path: build/openapi.json
+
