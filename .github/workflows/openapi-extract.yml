@@ -18,7 +18,7 @@ jobs:
         run: ./gradlew clean generateOpenApiDocs
 
       - name: Swagger UI Action
-      - uses: Legion2/swagger-ui-action@v1.3.0
+        uses: Legion2/swagger-ui-action@v1.3.0
         with:
           output: swagger-ui
           spec-file: build/openapi.json
