@@ -4,6 +4,7 @@ on:
     workflows: [ "Build & Upload OpenAPI Spec" ]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   compare-and-notify:
