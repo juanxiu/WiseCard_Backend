@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/sample/sample": {
+    "/sample/test": {
       "get": {
         "tags": [
           "sample-controller"
