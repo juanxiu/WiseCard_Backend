@@ -31,7 +31,7 @@ jobs:
           publish_dir: swagger-ui
 
       - name: Upload OpenAPI spec as artifact
-        uses: actions/upload-artifact@v3 #json 파일 아티팩트로 업로드
+        uses: actions/upload-artifact@v4 #json 파일 아티팩트로 업로드
         with:
           name: openapi-spec
           path: build/openapi.json
