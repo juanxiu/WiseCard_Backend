@@ -67,7 +67,7 @@ jobs:
 
 
       - name: Run openapi-diff with docker # 도커 허브에서 이미지 사용
-        run: docker run --rm -v ${{ github.workspace }}:/specs openapitools/openapi-diff:latest /specs/prod/build/openapi.json /specs/build/openapi.json --json /specs/diff.json
+        run: docker run --rm -v ${{ github.workspace }}:/specs openapitools/openapi-diff:latest /specs/prod/openapi.json /specs/build/openapi.json --json /specs/diff.json
 
       - name: Show diff result
         run: cat diff.json
