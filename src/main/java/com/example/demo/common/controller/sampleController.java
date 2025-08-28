@@ -9,7 +9,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/sample")
 public class sampleController {
-    @RequestMapping("/test")
+    @RequestMapping("/sample")
     public String sampleEndpoint(
             @RequestBody List<Integer> requestBody
             ){
