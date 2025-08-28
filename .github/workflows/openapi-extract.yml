@@ -57,10 +57,13 @@ jobs:
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4 # 아티팩트 다운로드
         with:
           name: prod-spec
           path: ./prod
+
+      - name: List downloaded prod artifact files # 경로 확인
+        run: ls -R ./prod
 
 
       - name: Run openapi-diff with docker # 도커 허브에서 이미지 사용
