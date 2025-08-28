@@ -73,6 +73,41 @@ jobs:
       - name: Show diff result
         run: cat diff.json
 
-      - name: Send Discord Notification
-        run :
+      - name: Send custom Discord Notification from diff.json
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const fetch = require('node-fetch');
+
+            const diff = JSON.parse(fs.readFileSync('diff.json', 'utf8'));
+
+            // newEndpoints 기반 메시지 포맷팅 함수
+            function formatNewEndpoints(endpoints) {
+              if (!endpoints || endpoints.length === 0) return "⚠️ 변경된 새로운 엔드포인트가 없습니다.\n";
+
+              let msg = "**🆕 새로운 엔드포인트 목록:**\n";
+              endpoints.forEach(ep => {
+                const path = ep.pathUrl || 'unknown path';
+                const methods = Object.keys(ep.path || {}).join(', ').toUpperCase() || 'N/A';
+                const tags = (ep.path && Object.values(ep.path)[0]?.tags) ? Object.values(ep.path)[0].tags.join(', ') : 'No tags';
+                msg += `- 경로: \`${path}\`\n  메서드: ${methods}\n  태그: ${tags}\n\n`;
+              });
+              return msg;
+            }
+
+            let message = '**OpenAPI 변경 알림**\n\n';
+            message += formatNewEndpoints(diff.newEndpoints);
+
+            // 추후 missingEndpoints, changedOperations 등도 비슷하게 추가 가능
+
+            const webhookUrl = process.env.SWAGGER_DISCORD_WEBHOOK;
+            await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: message }),
+            });
+
+
+
 
