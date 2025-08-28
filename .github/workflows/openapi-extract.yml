@@ -75,6 +75,8 @@ jobs:
 
       - name: Send custom Discord Notification from diff.json
         uses: actions/github-script@v6
+        env:
+          SWAGGER_DISCORD_WEBHOOK: ${{ secrets.SWAGGER_DISCORD_WEBHOOK }}
         with:
           script: |
             const fs = require('fs');
