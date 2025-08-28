@@ -7,7 +7,7 @@ on:
     types: [ closed ]
 
 jobs:
-  build:
+  build-prod:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +22,28 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
-      - run: cp build/openapi.json build/openapi-prod.json
 
+      - uses: actions/upload-artifact@v3 # 아티팩트 업로드
+        with:
+          name: prod-spec
+          path: build/openapi.json
+
+      - name: Swagger UI Action
+        uses: Legion2/swagger-ui-action@v1.3.0
+        with:
+          output: swagger-ui
+          spec-file: build/openapi.json
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3  #gp-pages 브랜치 root에 swagger-ui push
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: swagger-ui
+
+  build-dev:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v4
         with:
           ref: feat/#1-project-setup  # dev 로 변경할 것
@@ -36,23 +56,15 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
-      - run: cp build/openapi.json build/openapi-dev.json
 
-      - name: Swagger UI Action
-        uses: Legion2/swagger-ui-action@v1.3.0
+      - uses: actions/download-artifact@v3
         with:
-          output: swagger-ui
-          spec-file: build/openapi-prod.json
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: prod-spec
+          path: ./prod
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3  #gp-pages 브랜치 root에 swagger-ui push
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: swagger-ui
 
       - name: Run openapi-diff with docker # 도커 허브에서 이미지 사용
-        run: docker run --rm -v ${{ github.workspace }}:/specs openapitools/openapi-diff:latest /specs/build/openapi-prod.json /specs/build/openapi-dev.json --json /specs/diff.json
+        run: docker run --rm -v ${{ github.workspace }}:/specs openapitools/openapi-diff:latest /specs/prod/build/openapi.json /specs/build/openapi.json --json /specs/diff.json
 
       - name: Show diff result
         run: cat diff.json
