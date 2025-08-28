@@ -42,6 +42,7 @@ jobs:
           publish_dir: swagger-ui
 
   build-dev:
+    needs: build-prod
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
