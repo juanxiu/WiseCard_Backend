@@ -23,7 +23,7 @@ jobs:
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
 
-      - uses: actions/upload-artifact@v3 # 아티팩트 업로드
+      - uses: actions/upload-artifact@v4 # 아티팩트 업로드
         with:
           name: prod-spec
           path: build/openapi.json
@@ -57,7 +57,7 @@ jobs:
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: prod-spec
           path: ./prod
