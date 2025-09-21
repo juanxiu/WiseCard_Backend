@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feat/#1-project-setup  # dev 로 변경할 것
+          ref: feat/#2-grpc-module  # dev 로 변경할 것
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
