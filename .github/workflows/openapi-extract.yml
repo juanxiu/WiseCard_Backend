@@ -9,6 +9,13 @@ on:
 jobs:
   build-prod:
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +29,11 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
+
+        env:
+          APP_API_KAKAO_KEY: ${{ secrets.APP_API_KAKAO_KEY }}
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
 
       - uses: actions/upload-artifact@v4 # 아티팩트 업로드
         with:

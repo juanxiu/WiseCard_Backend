@@ -19,8 +19,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
       password:
       database: 0
       timeout: 2000ms
@@ -43,4 +43,4 @@ grpc:
 app:
   api:
     kakao:
-      key: ${APP_API_KAKAO_KEY}
+      key: ${APP_API_KAKAO_KEY:}
