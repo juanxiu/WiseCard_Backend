@@ -23,7 +23,7 @@ COPY src src
 RUN gradle build --no-daemon -x test
 
 # 실행 단계
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # 보안을 위한 non-root 사용자 생성
 RUN groupadd -r appuser && useradd -r -g appuser appuser
