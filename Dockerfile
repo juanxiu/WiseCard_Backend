@@ -25,9 +25,6 @@ RUN gradle build --no-daemon -x test
 # 실행 단계
 FROM eclipse-temurin:17-jre-alpine
 
-# 보안을 위한 non-root 사용자 생성
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
 # 작업 디렉토리 설정
 WORKDIR /app
 
@@ -36,9 +33,6 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 포트 노출 (Spring Boot 기본 포트 + gRPC 포트)
 EXPOSE 8080 9091
-
-# 사용자 변경
-USER appuser
 
 # 헬스체크 추가
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
