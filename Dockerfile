@@ -14,16 +14,16 @@ COPY settings.gradle .
 COPY gRPC gRPC
 
 # 의존성 다운로드 (캐시 최적화)
-RUN gradle dependencies --no-daemon
+RUN ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사
 COPY src src
 
 # gRPC 모듈 먼저 빌드
-RUN gradle :gRPC:build --no-daemon -x test
+RUN ./gradlew :gRPC:build --no-daemon -x test
 
 # 전체 애플리케이션 빌드
-RUN gradle build --no-daemon -x test
+RUN ./gradlew build --no-daemon -x test
 
 # 실행 단계
 FROM eclipse-temurin:17-jre
