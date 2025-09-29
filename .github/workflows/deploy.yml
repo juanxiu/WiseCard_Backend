@@ -92,8 +92,6 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
 
   deploy:
     needs: [test, build-and-push]
@@ -169,78 +167,3 @@ jobs:
           docker image prune -f
           
           echo "배포가 성공적으로 완료되었습니다!"
-
-  deploy-staging:
-    needs: [test, build-and-push]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    - name: Deploy to EC2 Staging
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.STAGING_EC2_HOST }}
-        username: ${{ secrets.STAGING_EC2_USER }}
-        key: ${{ secrets.STAGING_EC2_SSH_KEY }}
-        port: ${{ secrets.STAGING_EC2_PORT || 22 }}
-        script: |
-          # EC2 스테이징 서버에서 실행할 배포 스크립트
-          cd /home/ubuntu/wisecard-backend-staging
-          
-          # 최신 코드 가져오기
-          git fetch origin
-          git reset --hard origin/develop
-          
-          # 환경변수 파일 업데이트
-          cat > .env << EOF
-          DB_HOST=${{ secrets.STAGING_DB_HOST }}
-          DB_NAME=${{ secrets.STAGING_DB_NAME }}
-          DB_USERNAME=${{ secrets.STAGING_DB_USERNAME }}
-          DB_PASSWORD=${{ secrets.STAGING_DB_PASSWORD }}
-          DB_PORT=${{ secrets.STAGING_DB_PORT }}
-          REDIS_HOST=${{ secrets.STAGING_REDIS_HOST }}
-          REDIS_PORT=${{ secrets.STAGING_REDIS_PORT }}
-          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
-          APP_API_KAKAO_KEY=${{ secrets.APP_API_KAKAO_KEY }}
-          APP_PORT=8081
-          GRPC_PORT=9092
-          EOF
-          
-          # Docker 이미지 빌드 및 시작
-          docker-compose down
-          docker-compose build --no-cache
-          docker-compose up -d
-          
-          # 헬스체크 (최대 5분 대기)
-          echo "스테이징 환경 헬스체크 시작..."
-          for i in {1..30}; do
-            if curl -f http://localhost:8081/actuator/health > /dev/null 2>&1; then
-              echo "스테이징 애플리케이션이 정상적으로 시작되었습니다."
-              break
-            fi
-            echo "헬스체크 시도 $i/30 - 대기 중..."
-            sleep 10
-          done
-          
-          # 최종 헬스체크
-          if ! curl -f http://localhost:8081/actuator/health; then
-            echo "스테이징 배포 실패 - 롤백을 시도합니다."
-            docker-compose down
-            docker-compose up -d
-            exit 1
-          fi
-          
-          # 불필요한 이미지 정리
-          docker image prune -f
-          
-          echo "스테이징 배포가 성공적으로 완료되었습니다!"
