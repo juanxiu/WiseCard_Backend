@@ -5,9 +5,7 @@ services:
 
   # WiseCard Backend 애플리케이션
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/juanxiu/wisecard_backend:latest
     container_name: wisecard-backend
     restart: unless-stopped
     environment:
