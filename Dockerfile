@@ -1,5 +1,5 @@
 # 멀티스테이지 빌드를 위한 Dockerfile
-FROM gradle:7.6-jdk17-alpine AS builder
+FROM eclipse-temurin:17-jre-alpine
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN gradle :gRPC:build --no-daemon -x test
 RUN gradle build --no-daemon -x test
 
 # 실행 단계
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 # 작업 디렉토리 설정
 WORKDIR /app
