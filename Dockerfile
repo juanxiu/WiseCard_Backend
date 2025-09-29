@@ -26,7 +26,7 @@ RUN gradle :gRPC:build --no-daemon -x test
 RUN gradle build --no-daemon -x test
 
 # 실행 단계
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 
 # 작업 디렉토리 설정
 WORKDIR /app
