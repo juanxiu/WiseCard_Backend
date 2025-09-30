@@ -9,6 +9,13 @@ on:
 jobs:
   build-prod:
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +29,11 @@ jobs:
 
       - name: Generate OpenAPI spec
         run: ./gradlew clean generateOpenApiDocs
+
+        env:
+          APP_API_KAKAO_KEY: ${{ secrets.APP_API_KAKAO_KEY }}
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
 
       - uses: actions/upload-artifact@v4 # 아티팩트 업로드
         with:
@@ -40,13 +52,16 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: swagger-ui
+          publish_branch: main   # 배포 대상 브랜치
+          destination_dir: ''    # 브랜치 루트에 배포
 
   build-dev:
+    needs: build-prod # 실행 순서 보장
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feat/#1-project-setup  # dev 로 변경할 것
+          ref: feat/#2-grpc-module  # dev 로 변경할 것
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -71,4 +86,43 @@ jobs:
 
       - name: Show diff result
         run: cat diff.json
+
+      - name: Send custom Discord Notification from diff.json
+        uses: actions/github-script@v6
+        env:
+          SWAGGER_DISCORD_WEBHOOK: ${{ secrets.SWAGGER_DISCORD_WEBHOOK }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const diff = JSON.parse(fs.readFileSync('diff.json', 'utf8'));
+
+            // newEndpoints 기반 메시지 포맷팅 함수
+            function formatNewEndpoints(endpoints) {
+              if (!endpoints || endpoints.length === 0) return "⚠️ 변경된 새로운 엔드포인트가 없습니다.\n";
+
+              let msg = "**🆕 새로운 엔드포인트 목록:**\n";
+              endpoints.forEach(ep => {
+                const path = ep.pathUrl || 'unknown path';
+                const methods = Object.keys(ep.path || {}).join(', ').toUpperCase() || 'N/A';
+                const tags = (ep.path && Object.values(ep.path)[0]?.tags) ? Object.values(ep.path)[0].tags.join(', ') : 'No tags';
+                msg += `- 경로: \`${path}\`\n  메서드: ${methods}\n  태그: ${tags}\n\n`;
+              });
+              return msg;
+            }
+
+            let message = '**OpenAPI 변경 알림**\n\n';
+            message += formatNewEndpoints(diff.newEndpoints);
+
+            // 추후 missingEndpoints, changedOperations 등도 비슷하게 추가 가능
+
+            const webhookUrl = process.env.SWAGGER_DISCORD_WEBHOOK;
+            await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: message }),
+            });
+
+
+
 

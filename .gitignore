@@ -31,3 +31,5 @@ out/
 # IntelliJ IDEA / JetBrains
 .idea/
 *.iml
+
+.env
