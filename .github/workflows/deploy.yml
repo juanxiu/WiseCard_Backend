@@ -114,7 +114,7 @@ jobs:
         port: 22
         script: |
           # EC2 서버에서 실행할 배포 스크립트
-          cd /home/ubuntu/WiseCard_Backnend
+          cd /home/ubuntu/WiseCard_Backend
           
           # 최신 코드 가져오기
           git fetch origin
